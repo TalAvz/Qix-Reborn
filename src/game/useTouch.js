@@ -3,14 +3,17 @@ import { useRef, useCallback, useEffect } from 'react'
 export function useTouch(isPlaying) {
   const touchDir = useRef({ x: 0, y: 0 })
   const touchCount = useRef(0)
-  const startPos = useRef(null)
   const active = useRef(false)
+  const fingerPos = useRef(null)
+  const lastEmitPos = useRef(null)
 
   const handleTouchStart = useCallback((e) => {
     e.preventDefault()
     touchCount.current = e.touches.length
     if (e.touches.length > 0) {
-      startPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      const pos = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      fingerPos.current = pos
+      lastEmitPos.current = pos
       active.current = true
     }
   }, [])
@@ -18,13 +21,23 @@ export function useTouch(isPlaying) {
   const handleTouchMove = useCallback((e) => {
     e.preventDefault()
     touchCount.current = e.touches.length
-    if (!startPos.current || e.touches.length === 0) return
-    const dx = e.touches[0].clientX - startPos.current.x
-    const dy = e.touches[0].clientY - startPos.current.y
-    const deadzone = 8
+    if (e.touches.length === 0) return
+    const pos = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    fingerPos.current = pos
+
+    if (!lastEmitPos.current) {
+      lastEmitPos.current = pos
+      return
+    }
+
+    // Continuously emit direction based on finger movement from last emitted position
+    const dx = pos.x - lastEmitPos.current.x
+    const dy = pos.y - lastEmitPos.current.y
+    const deadzone = 4  // Reduced deadzone for more responsive continuous movement
     if (Math.abs(dx) > deadzone || Math.abs(dy) > deadzone) {
+      // Emit a larger magnitude so the engine's moveAmount threshold is met
       touchDir.current = { x: dx, y: dy }
-      startPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      lastEmitPos.current = pos
     }
   }, [])
 
@@ -34,7 +47,8 @@ export function useTouch(isPlaying) {
     if (e.touches.length === 0) {
       active.current = false
       touchDir.current = { x: 0, y: 0 }
-      startPos.current = null
+      fingerPos.current = null
+      lastEmitPos.current = null
     }
   }, [])
 

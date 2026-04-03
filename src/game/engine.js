@@ -66,6 +66,7 @@ export function createGameState(levelIndex) {
     qixes,
     sparx: sparxList,
     fuse: null,
+    drawGraceTimer: 0,
     lives: LIVES_DEFAULT,
     score: 0,
     combo: 1,
@@ -91,6 +92,7 @@ export function updateGame(state, dt, touchDir, touchCount) {
     if (state.messageTimer <= 0) state.message = null
   }
   state.shakeTimer = Math.max(0, state.shakeTimer - dt)
+  if (state.drawGraceTimer > 0) state.drawGraceTimer -= dt
 
   updatePlayer(state, dt, touchDir, touchCount)
   updateQixes(state, dt)
@@ -123,10 +125,17 @@ function updatePlayer(state, dt, touchDir, touchCount) {
 
   if (moveAmount < 0.3) return
 
+  // Allow multiple steps per frame for responsive border movement
+  // Scale steps by touch magnitude (larger drag = more steps)
+  const touchMag = Math.sqrt(dx * dx + dy * dy)
+  const maxSteps = player.drawing ? 1 : Math.min(Math.max(1, Math.floor(touchMag / 6)), 5)
+
+  for (let step = 0; step < maxSteps; step++) {
+
   const targetCol = player.gridCol + moveCol
   const targetRow = player.gridRow + moveRow
 
-  if (targetCol < 0 || targetCol >= board.cols || targetRow < 0 || targetRow >= board.rows) return
+  if (targetCol < 0 || targetCol >= board.cols || targetRow < 0 || targetRow >= board.rows) break
 
   const targetClaimed = isClaimed(board, targetCol, targetRow)
   const targetIsEdge = isOnClaimedEdge(board, targetCol, targetRow)
@@ -156,11 +165,9 @@ function updatePlayer(state, dt, touchDir, touchCount) {
       player.drawLine.push([targetCol, targetRow])
       player.drawLineSet.add(`${targetCol},${targetRow}`)
 
-      state.fuse = {
-        lineIndex: 0,
-        progress: 0,
-        speed: FUSE_BASE_SPEED * state.config.fuseSpeedMult,
-      }
+      // Grace period: delay fuse spawn and collision detection
+      state.drawGraceTimer = 0.5
+      state.fuse = null
     }
   } else {
     player.fast = touchCount >= 2
@@ -218,8 +225,19 @@ function updatePlayer(state, dt, touchDir, touchCount) {
       player.y = wy
       player.drawLine.push([targetCol, targetRow])
       player.drawLineSet.add(`${targetCol},${targetRow}`)
+
+      // Spawn fuse after player has drawn 3+ cells inward
+      if (!state.fuse && player.drawLine.length >= 3 && state.drawGraceTimer <= 0) {
+        state.fuse = {
+          lineIndex: 0,
+          progress: 0,
+          speed: FUSE_BASE_SPEED * state.config.fuseSpeedMult,
+        }
+      }
     }
   }
+
+  } // end multi-step loop
 }
 
 function updateQixes(state, dt) {
@@ -338,11 +356,16 @@ function checkCollisions(state) {
   const { player } = state
   if (!player.drawing) return
 
+  // Grace period after leaving border — no active line collision
+  if (state.drawGraceTimer > 0) return
+
   const pCol = player.gridCol
   const pRow = player.gridRow
 
   for (const qix of state.qixes) {
-    for (const [lc, lr] of player.drawLine) {
+    // Skip first cell (border start point) in collision checks
+    for (let i = 1; i < player.drawLine.length; i++) {
+      const [lc, lr] = player.drawLine[i]
       const [wlx, wly] = gridToWorld(lc, lr)
       const dist = Math.sqrt((qix.x - wlx) ** 2 + (qix.y - wly) ** 2)
       if (dist < GRID_STEP * 2) {
@@ -389,6 +412,7 @@ function killPlayer(state) {
   state.player.x = wx
   state.player.y = wy
   state.fuse = null
+  state.drawGraceTimer = 0
 }
 
 function completeLevel(state) {
