@@ -2,14 +2,17 @@ import React from 'react'
 
 const styles = {
   overlay: {
-    position: 'absolute',
-    inset: 0,
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'rgba(0,0,10,0.85)',
-    zIndex: 50,
+    background: 'radial-gradient(ellipse at center, #0a0a3e 0%, #000011 100%)',
+    zIndex: 999,
     pointerEvents: 'all',
     fontFamily: "'Segoe UI', system-ui, sans-serif",
     color: '#fff',

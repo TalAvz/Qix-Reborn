@@ -4,15 +4,18 @@ import { LEVEL_CONFIGS } from '../game/constants.js'
 
 const styles = {
   container: {
-    position: 'absolute',
-    inset: 0,
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     background: 'radial-gradient(ellipse at center, #0a0a3e 0%, #000011 100%)',
     fontFamily: "'Segoe UI', system-ui, sans-serif",
     color: '#fff',
-    zIndex: 100,
+    zIndex: 999,
     pointerEvents: 'all',
     padding: '16px',
     overflowY: 'auto',

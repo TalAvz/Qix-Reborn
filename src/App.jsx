@@ -92,14 +92,13 @@ function App() {
         />
       )}
 
-      {(screen === 'playing' || screen === 'gameover' || screen === 'levelcomplete') && (
+      {screen === 'playing' && (
         <>
           <GameScene
             gameStateRef={gameStateRef}
             touchDir={touchDir}
             touchCount={touchCount}
             renderTick={renderTick}
-            pointerEvents={screen === 'playing' ? 'auto' : 'none'}
           />
           <HUD gameState={gameStateRef.current} />
         </>
