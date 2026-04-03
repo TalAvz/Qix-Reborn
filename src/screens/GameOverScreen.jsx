@@ -10,6 +10,7 @@ const styles = {
     justifyContent: 'center',
     background: 'rgba(0,0,0,0.85)',
     zIndex: 50,
+    pointerEvents: 'all',
     fontFamily: "'Segoe UI', system-ui, sans-serif",
     color: '#fff',
   },

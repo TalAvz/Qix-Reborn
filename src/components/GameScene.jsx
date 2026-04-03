@@ -53,13 +53,13 @@ function GameLoop({ gameStateRef, touchDir, touchCount }) {
   return null
 }
 
-export default function GameScene({ gameStateRef, touchDir, touchCount, renderTick }) {
+export default function GameScene({ gameStateRef, touchDir, touchCount, renderTick, pointerEvents = 'auto' }) {
   const state = gameStateRef.current
   if (!state) return null
 
   return (
     <Canvas
-      style={{ width: '100%', height: '100%', background: '#000011' }}
+      style={{ width: '100%', height: '100%', background: '#000011', pointerEvents }}
       gl={{ antialias: true, alpha: false }}
       dpr={[1, 2]}
     >

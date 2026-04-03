@@ -13,6 +13,7 @@ const styles = {
     fontFamily: "'Segoe UI', system-ui, sans-serif",
     color: '#fff',
     zIndex: 100,
+    pointerEvents: 'all',
   },
   title: {
     fontSize: '42px',

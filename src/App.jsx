@@ -15,7 +15,7 @@ function App() {
   const [renderTick, setRenderTick] = useState(0)
   const gameStateRef = useRef(null)
   const levelRef = useRef(0)
-  const { touchDir, touchCount, active } = useTouch()
+  const { touchDir, touchCount, active } = useTouch(screen === 'playing')
 
   // Lock landscape orientation
   useEffect(() => {
@@ -99,6 +99,7 @@ function App() {
             touchDir={touchDir}
             touchCount={touchCount}
             renderTick={renderTick}
+            pointerEvents={screen === 'playing' ? 'auto' : 'none'}
           />
           <HUD gameState={gameStateRef.current} />
         </>

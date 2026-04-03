@@ -1,6 +1,6 @@
 import { useRef, useCallback, useEffect } from 'react'
 
-export function useTouch() {
+export function useTouch(isPlaying) {
   const touchDir = useRef({ x: 0, y: 0 })
   const touchCount = useRef(0)
   const startPos = useRef(null)
@@ -59,6 +59,7 @@ export function useTouch() {
   }, [])
 
   useEffect(() => {
+    if (!isPlaying) return
     const el = document
     el.addEventListener('touchstart', handleTouchStart, { passive: false })
     el.addEventListener('touchmove', handleTouchMove, { passive: false })
@@ -72,7 +73,7 @@ export function useTouch() {
       el.removeEventListener('keydown', handleKeyDown)
       el.removeEventListener('keyup', handleKeyUp)
     }
-  }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleKeyDown, handleKeyUp])
+  }, [isPlaying, handleTouchStart, handleTouchMove, handleTouchEnd, handleKeyDown, handleKeyUp])
 
   return { touchDir, touchCount, active }
 }
